@@ -10,13 +10,23 @@ export function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Garantir que não haja duplicata 
+  const uniqueByName = (arr) => {
+    const seen = new Set();
+    return arr.filter((char) => {
+      if (seen.has(char.name)) return false;
+      seen.add(char.name);
+      return true;
+    });
+  };
+
   useEffect(() => {
     async function fetchCharacters() {
       try {
         const response = await axios.get("https://hp-api.onrender.com/api/characters");
-        const data = response.data;
+        const data = uniqueByName(response.data); // Remove duplicatas por nome
         setCharacters(data);
-        setDisplayedCharacters(data.slice(0, 10));
+        setDisplayedCharacters(data);
         // Gera uma lista de espécies únicas para o filtro
         const uniqueSpecies = [...new Set(data.map((char) => char.species).filter(Boolean))];
         setSpeciesList(uniqueSpecies);
@@ -37,11 +47,13 @@ export function Home() {
       (searchSpecies === "" || char.species === searchSpecies)
     );
   });
-
+  // Função para gerar de forma aleatoria
   const gerarAleatorio = () => {
-    const shuffled = [...characters].sort(() => 0.5 - Math.random());
-    setDisplayedCharacters(shuffled.slice(0, 10));
+    const shuffled = [...characters];
+    shuffled.sort(() => 0.5 - Math.random());
+    setDisplayedCharacters(shuffled);
   };
+
 
   if (loading) return <p className="text-center mt-10 text-lg">Carregando personagens...</p>;
   if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
@@ -79,6 +91,13 @@ export function Home() {
         >
           Gerar Aleatórios
         </button>
+
+        {/* <button
+          onClick={gerarNPersonagensAleatorio}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md"
+        >
+          Gerar 12 Aleatórios
+        </button> */}
       </div>
 
       {/* lista de personagens filtrada */}
